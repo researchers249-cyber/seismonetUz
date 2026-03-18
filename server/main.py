@@ -1,13 +1,25 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from datetime import datetime
 import uvicorn
 import os
 from dotenv import load_dotenv
 
 load_dotenv()
 
-app = FastAPI(title="SEISMON API", version="1.0.0")
+from server.routes import health_router, eq_router, alert_router, device_router
+from server.utils.scheduler import scheduler
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await scheduler.start()
+    yield
+    await scheduler.stop()
+
+
+app = FastAPI(title="SEISMON API", version="1.0.0", lifespan=lifespan)
 
 allowed_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:5173").split(",")
 
@@ -19,10 +31,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
-@app.get("/health")
-async def health_check():
-    return {"status": "ok", "timestamp": datetime.utcnow().isoformat()}
+# Routers
+app.include_router(health_router)
+app.include_router(eq_router, prefix="/api")
+app.include_router(alert_router, prefix="/api")
+app.include_router(device_router, prefix="/api")
 
 
 @app.get("/")
