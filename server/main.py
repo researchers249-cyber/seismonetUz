@@ -1,20 +1,28 @@
 from contextlib import asynccontextmanager
+import uuid
+from datetime import datetime, timezone
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 import uvicorn
 import os
 from dotenv import load_dotenv
 
 load_dotenv()
 
+from server import database
+from server.models import SimulateRequest
 from server.routes import health_router, eq_router, alert_router, device_router
+from server.services.alert import create_alert
+from server.ws.manager import ws_manager
 from server.ws.routes import ws_router
 from server.utils.scheduler import scheduler
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    database.create_tables()
     await scheduler.start()
     yield
     await scheduler.stop()
@@ -39,9 +47,45 @@ app.include_router(alert_router, prefix="/api")
 app.include_router(device_router, prefix="/api")
 app.include_router(ws_router)
 
+
+@app.post("/api/simulate")
+async def simulate_earthquake(body: SimulateRequest):
+    """Simulate an earthquake and broadcast it to all connected WebSocket clients."""
+    now = datetime.now(timezone.utc).isoformat()
+    eq = {
+        "id": str(uuid.uuid4()),
+        "magnitude": body.magnitude,
+        "latitude": body.latitude,
+        "longitude": body.longitude,
+        "depth": body.depth,
+        "location": body.location,
+        "timestamp": now,
+        "source": "simulated",
+    }
+    row_id = database.save_earthquake(eq)
+    alert = create_alert({**eq, "id": row_id})
+    database.save_alert(
+        {
+            "earthquake_id": row_id,
+            "severity": alert["severity"],
+            "message": alert["message"],
+            "timestamp": alert["timestamp"],
+        }
+    )
+    await ws_manager.broadcast(
+        {
+            "type": "EARTHQUAKE_DETECTED",
+            "earthquake": {**eq, "id": str(row_id)},
+            "alert": alert,
+        }
+    )
+    return {"status": "ok", "earthquake_id": row_id}
+
+
 @app.get("/")
 async def root():
     return {"message": "SEISMON API ishlayapti"}
+
 
 if os.path.exists("dist"):
     app.mount("/", StaticFiles(directory="dist", html=True), name="static")

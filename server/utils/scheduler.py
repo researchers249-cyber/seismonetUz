@@ -8,6 +8,7 @@ from server import database
 from server.config import settings
 from server.services import usgs, emsc
 from server.services.alert import create_alert
+from server.ws.manager import ws_manager
 
 logger = logging.getLogger(__name__)
 
@@ -86,6 +87,13 @@ class AsyncScheduler:
                         "severity": alert["severity"],
                         "message": alert["message"],
                         "timestamp": alert["timestamp"],
+                    }
+                )
+                await ws_manager.broadcast(
+                    {
+                        "type": "EARTHQUAKE_DETECTED",
+                        "earthquake": {**eq, "id": str(row_id)},
+                        "alert": alert,
                     }
                 )
                 new_count += 1
