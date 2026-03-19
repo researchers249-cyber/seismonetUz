@@ -22,6 +22,9 @@ export default function AboutPage() {
               { label: "React 18", desc: "Frontend" },
               { label: "TypeScript", desc: "Tipe xavfsizligi" },
               { label: "Tailwind CSS", desc: "Stil" },
+              { label: "Leaflet", desc: "Interaktiv xarita" },
+              { label: "Chart.js", desc: "Seysmik grafik" },
+              { label: "Zustand", desc: "State management" },
               { label: "Railway", desc: "Deploy" },
             ].map(({ label, desc }) => (
               <div

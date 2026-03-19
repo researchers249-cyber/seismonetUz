@@ -1,11 +1,14 @@
 import { useAlertStore } from "../store/alertStore";
 import { formatDistanceToNow } from "date-fns";
+import { AlertModal } from "../components/AlertModal";
 
 export default function AlertsPage() {
-  const { alerts, clearAll } = useAlertStore();
+  const { alerts, clearAll, activeAlert, dismissAlert } = useAlertStore();
 
   return (
     <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      {/* Active alert modal */}
+      <AlertModal alert={activeAlert} onClose={dismissAlert} />
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-3xl font-bold text-white">Ogohlantirishlar</h1>
