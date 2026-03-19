@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { useTheme } from "../../hooks/useTheme";
 import { StatusPill } from "../ui/StatusPill";
@@ -16,11 +17,13 @@ interface NavbarProps {
 
 export function Navbar({ connected }: NavbarProps) {
   const { theme, toggleTheme } = useTheme();
+  const [menuOpen, setMenuOpen] = useState(false);
 
   return (
     <nav className="sticky top-0 z-50 bg-gray-900 border-b border-gray-800 shadow-lg">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
+
           {/* Logo */}
           <Link to="/" className="flex items-center gap-1 select-none">
             <span className="text-2xl font-bold text-white tracking-wider font-['Oswald']">
@@ -31,7 +34,7 @@ export function Navbar({ connected }: NavbarProps) {
             </span>
           </Link>
 
-          {/* Nav links */}
+          {/* Desktop nav links */}
           <div className="hidden md:flex items-center gap-1">
             {NAV_LINKS.map(({ to, label }) => (
               <NavLink
@@ -52,30 +55,72 @@ export function Navbar({ connected }: NavbarProps) {
             ))}
           </div>
 
-          {/* Right side: status + theme toggle */}
-          <div className="flex items-center gap-4">
+          {/* Right side: status + theme toggle + hamburger */}
+          <div className="flex items-center gap-3">
             <StatusPill online={connected} label={connected ? "Online" : "Offline"} />
 
+            {/* Theme toggle */}
             <button
               onClick={toggleTheme}
               aria-label="Temani almashtirish"
               className="p-2 rounded-full text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"
             >
               {theme === "dark" ? (
-                /* Sun icon */
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v1m0 16v1m8.485-8.485h-1M4.515 12H3.515m15.364-6.364-.707.707M6.343 17.657l-.707.707m12.728 0-.707-.707M6.343 6.343l-.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z" />
                 </svg>
               ) : (
-                /* Moon icon */
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M21 12.79A9 9 0 1111.21 3a7 7 0 109.79 9.79z" />
+                </svg>
+              )}
+            </button>
+
+            {/* Hamburger — faqat mobilda ko'rinadi */}
+            <button
+              onClick={() => setMenuOpen((prev) => !prev)}
+              aria-label="Menyuni ochish"
+              className="md:hidden p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"
+            >
+              {menuOpen ? (
+                /* X icon */
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              ) : (
+                /* Hamburger icon */
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
                 </svg>
               )}
             </button>
           </div>
         </div>
       </div>
+
+      {/* Mobile dropdown menu */}
+      {menuOpen && (
+        <div className="md:hidden bg-gray-900 border-t border-gray-800 px-4 pb-3 pt-2 flex flex-col gap-1">
+          {NAV_LINKS.map(({ to, label }) => (
+            <NavLink
+              key={to}
+              to={to}
+              end={to === "/"}
+              onClick={() => setMenuOpen(false)}
+              className={({ isActive }) =>
+                [
+                  "block px-3 py-2 rounded-md text-sm font-medium transition-colors",
+                  isActive
+                    ? "bg-gray-700 text-white"
+                    : "text-gray-400 hover:text-white hover:bg-gray-800",
+                ].join(" ")
+              }
+            >
+              {label}
+            </NavLink>
+          ))}
+        </div>
+      )}
     </nav>
   );
 }

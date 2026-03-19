@@ -24,4 +24,6 @@ export const SEVERITY_COLORS: Record<string, string> = {
 }
 
 export const API_BASE = "/api"
-export const WS_URL = `ws://${window.location.host}/ws`
+
+// ✅ wss:// HTTPS uchun, ws:// localhost uchun
+export const WS_URL = `${window.location.protocol === "https:" ? "wss" : "ws"}://${window.location.host}/ws`
