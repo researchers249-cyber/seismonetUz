@@ -1,3 +1,27 @@
+@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Oswald:wght@400;500;600;700&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+  --background: 240 10% 4%;
+  --foreground: 0 0% 98%;
+  --card: 240 10% 6%;
+  --primary: 0 84% 60%;
+  --severity-green: 142 71% 45%;
+  --severity-yellow: 45 93% 47%;
+  --severity-orange: 24 95% 53%;
+  --severity-red: 0 84% 60%;
+  --radius: 0.75rem;
+}
+
+body {
+  font-family: "Manrope", sans-serif;
+}
+
+h1,
+h2,
+h3 {
+  font-family: "Oswald", sans-serif;
+}
