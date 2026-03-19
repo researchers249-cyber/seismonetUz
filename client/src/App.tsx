@@ -30,7 +30,7 @@ function AppShell() {
   const { activeAlert, dismissAlert } = useAlertStore();
 
   // WebSocket ulanishini ishga tushirish
-  useWebSocket();
+  const { connected } = useWebSocket();
 
   // dark/light klassini <html> ga qo'llash
   useEffect(() => {
@@ -43,7 +43,7 @@ function AppShell() {
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-950 text-gray-100">
-      <Navbar />
+      <Navbar connected={connected} />
       <AlertBanner alert={activeAlert} onDismiss={dismissAlert} />
 
       <div className="flex-1">

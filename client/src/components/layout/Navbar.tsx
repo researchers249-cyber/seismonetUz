@@ -1,7 +1,6 @@
 import { Link, NavLink } from "react-router-dom";
 import { useTheme } from "../../hooks/useTheme";
 import { StatusPill } from "../ui/StatusPill";
-import { useWebSocket } from "../../hooks/useWebSocket";
 
 const NAV_LINKS = [
   { to: "/", label: "Bosh sahifa" },
@@ -11,9 +10,12 @@ const NAV_LINKS = [
   { to: "/about", label: "Haqida" },
 ];
 
-export function Navbar() {
+interface NavbarProps {
+  connected: boolean;
+}
+
+export function Navbar({ connected }: NavbarProps) {
   const { theme, toggleTheme } = useTheme();
-  const { connected } = useWebSocket();
 
   return (
     <nav className="sticky top-0 z-50 bg-gray-900 border-b border-gray-800 shadow-lg">
