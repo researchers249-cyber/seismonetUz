@@ -26,7 +26,7 @@ async def get_earthquakes(
                 depth=row.get("depth") or 0.0,
                 location=row.get("location") or "",
                 timestamp=row.get("timestamp", ""),
-                source=row.get("source") or "unknown",
+                source=row.get("source") or "usgs",
             )
         )
     return result

@@ -31,7 +31,7 @@ Chart.register(
 // Declare global window property set by useAccelerometer
 declare global {
   interface Window {
-    __accelData?: { timestamp: number; g: number }
+    __accelData?: { x: number; y: number; z: number; timestamp: number }
   }
 }
 
@@ -124,7 +124,7 @@ export function SeismicChart({ isRunning }: SeismicChartProps) {
       })
 
       const g = accel
-        ? accel.g
+        ? Math.sqrt(accel.x ** 2 + accel.y ** 2 + accel.z ** 2) / 9.81
         : Math.random() * 0.04 - 0.02 // fallback: tiny noise when no sensor
 
       const labels = chart.data.labels as string[]
