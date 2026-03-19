@@ -77,7 +77,7 @@ export function SeismicChart({ isRunning }: SeismicChartProps) {
           legend: { labels: { color: "#9ca3af" } },
           tooltip: {
             callbacks: {
-              label: (ctx) => `${ctx.parsed.y.toFixed(3)} g`,
+              label: (ctx) => `${(ctx.parsed.y ?? 0).toFixed(3)} g`,
             },
           },
         },
