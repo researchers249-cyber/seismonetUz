@@ -39,6 +39,8 @@ app.include_router(alert_router, prefix="/api")
 app.include_router(device_router, prefix="/api")
 app.include_router(ws_router)
 
+if os.path.exists("dist"):
+    app.mount("/", StaticFiles(directory="dist", html=True), name="static")
 
 @app.get("/")
 async def root():
