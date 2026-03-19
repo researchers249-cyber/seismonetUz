@@ -1,5 +1,4 @@
 import { useAlertStore } from "../store/alertStore";
-import { SeverityBadge } from "../components/ui/SeverityBadge";
 import { formatDistanceToNow } from "date-fns";
 
 export default function AlertsPage() {
