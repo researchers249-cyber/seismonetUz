@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from server.routes import health_router, eq_router, alert_router, device_router
+from server.ws.routes import ws_router
 from server.utils.scheduler import scheduler
 
 
@@ -36,6 +37,7 @@ app.include_router(health_router)
 app.include_router(eq_router, prefix="/api")
 app.include_router(alert_router, prefix="/api")
 app.include_router(device_router, prefix="/api")
+app.include_router(ws_router)
 
 
 @app.get("/")
