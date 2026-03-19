@@ -50,7 +50,6 @@ app.include_router(ws_router)
 
 @app.post("/api/simulate")
 async def simulate_earthquake(body: SimulateRequest):
-    """Simulate an earthquake and broadcast it to all connected WebSocket clients."""
     now = datetime.now(timezone.utc).isoformat()
     eq = {
         "id": str(uuid.uuid4()),
@@ -82,15 +81,17 @@ async def simulate_earthquake(body: SimulateRequest):
     return {"status": "ok", "earthquake_id": row_id}
 
 
-@app.get("/")
+# ↓ "/" o'chirildi — StaticFiles egallab oladi
+@app.get("/api/status")
 async def root():
     return {"message": "SEISMON API ishlayapti"}
-
-
-if os.path.exists("dist"):
-    app.mount("/", StaticFiles(directory="dist", html=True), name="static")
 
 
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 8000))
     uvicorn.run("server.main:app", host="0.0.0.0", port=port, reload=True)
+
+
+# ↓ Eng oxirida — "/" bo'sh bo'lgani uchun React ishlaydi
+if os.path.exists("dist"):
+    app.mount("/", StaticFiles(directory="dist", html=True), name="static")
