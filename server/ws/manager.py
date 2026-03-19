@@ -99,6 +99,16 @@ class ConnectionManager:
             )
         return result
 
+    def get_device_lat(self, device_id: str) -> float | None:
+        """Return cached latitude for *device_id*, or ``None``."""
+        info = self.device_info.get(device_id)
+        return info.get("lat") if info else None
+
+    def get_device_lon(self, device_id: str) -> float | None:
+        """Return cached longitude for *device_id*, or ``None``."""
+        info = self.device_info.get(device_id)
+        return info.get("lon") if info else None
+
     # ── broadcasting ──────────────────────────────────────
 
     async def _send_safe(self, device_id: str, ws: WebSocket, message: dict[str, Any]) -> bool:

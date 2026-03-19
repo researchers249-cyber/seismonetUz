@@ -26,6 +26,7 @@ from server.models import (
     WSSimulateEarthquake,
 )
 from server.services.alert import create_alert, determine_severity
+from server.services.analyzer import analyzer
 from server.ws.manager import ws_manager
 
 logger = logging.getLogger(__name__)
@@ -99,10 +100,9 @@ async def _handle_accel_data(device_id: str, raw: dict[str, Any]) -> None:
     """
     Process accelerometer data from a device.
 
-    Parses the payload into a SignalData model.
-    Signal analysis (analyzer.analyze_signal) will be wired in Session O3;
-    for now we log the data and do a simple STA/LTA-like magnitude check
-    as a placeholder to close the signal chain end-to-end.
+    Parses the payload into a ``SignalData`` model, feeds it to the
+    :pyclass:`SignalAnalyzer`, and — if a seismic event is detected with
+    sufficient confidence — creates an earthquake + alert and broadcasts.
     """
     try:
         msg = WSAccelData.model_validate(raw)
@@ -115,31 +115,93 @@ async def _handle_accel_data(device_id: str, raw: dict[str, Any]) -> None:
     # Update device position if sent
     ws_manager.update_device_info(device_id, lat=signal.latitude, lon=signal.longitude)
 
-    # Placeholder: compute vector magnitude sqrt(x²+y²+z²)
-    # A real analyzer will replace this in O3
-    import math
+    # ── Signal Analyzer (O3) ──────────────────────────
+    result = analyzer.add_signal(
+        {
+            "device_id": device_id,
+            "x": signal.x,
+            "y": signal.y,
+            "z": signal.z,
+            "timestamp": signal.timestamp,
+        }
+    )
 
-    magnitude_vec = math.sqrt(signal.x ** 2 + signal.y ** 2 + signal.z ** 2)
-
-    # If gravity-subtracted magnitude exceeds threshold, treat as possible event
-    ACCEL_THRESHOLD = 1.5  # m/s² above ambient ~9.8
-    if magnitude_vec > (9.8 + ACCEL_THRESHOLD):
-        logger.warning(
-            "High acceleration from %s: %.2f m/s² — potential seismic event",
+    if result is None:
+        logger.debug(
+            "ACCEL from %s: x=%.3f y=%.3f z=%.3f — no event",
             device_id,
-            magnitude_vec,
+            signal.x,
+            signal.y,
+            signal.z,
         )
-        # TODO(O3): Replace with proper analyzer.analyze_signal() call
-        # For now, we don't auto-create earthquake events from raw accel data
-        # until the signal analyzer is implemented.
+        return
 
-    logger.debug(
-        "ACCEL from %s: x=%.3f y=%.3f z=%.3f mag=%.3f",
+    # ── Zilzila aniqlandi ─────────────────────────────
+    confidence: float = result["confidence"]
+    magnitude: float = result["estimated_magnitude"]
+
+    # Past confidence — faqat log, broadcast yo'q
+    _MIN_BROADCAST_CONFIDENCE = 0.4
+    if confidence < _MIN_BROADCAST_CONFIDENCE:
+        logger.info(
+            "Low-confidence detection from %s: M%.1f (conf=%.2f) — not broadcasting",
+            device_id,
+            magnitude,
+            confidence,
+        )
+        return
+
+    # Earthquake va alert yaratish
+    now = datetime.now(timezone.utc).isoformat()
+    eq_id = str(uuid.uuid4())
+    lat = signal.latitude or ws_manager.get_device_lat(device_id)
+    lon = signal.longitude or ws_manager.get_device_lon(device_id)
+
+    earthquake = EarthquakeModel(
+        id=eq_id,
+        magnitude=magnitude,
+        latitude=lat or 0.0,
+        longitude=lon or 0.0,
+        depth=10.0,  # taxminiy chuqurlik
+        location="Qurilma aniqlagan zilzila",
+        timestamp=now,
+        source="device",
+    )
+
+    eq_dict = earthquake.model_dump(by_alias=False)
+    row_id = database.save_earthquake(eq_dict)
+
+    alert_dict = create_alert({**eq_dict, "id": row_id})
+    database.save_alert(
+        {
+            "earthquake_id": row_id,
+            "severity": alert_dict["severity"],
+            "message": alert_dict["message"],
+            "timestamp": alert_dict["timestamp"],
+        }
+    )
+
+    alert = AlertModel(
+        id=alert_dict["id"],
+        earthquake_id=eq_id,
+        severity=alert_dict["severity"],
+        message=alert_dict["message"],
+        timestamp=alert_dict["timestamp"],
+        affected_radius_km=alert_dict["affected_radius_km"],
+    )
+
+    broadcast_msg = WSEarthquakeDetected(
+        type="EARTHQUAKE_DETECTED",
+        earthquake=earthquake,
+        alert=alert,
+    )
+    await ws_manager.broadcast(broadcast_msg.model_dump(by_alias=True))
+
+    logger.info(
+        "Device-detected earthquake broadcast: M%.1f (conf=%.2f) from %s",
+        magnitude,
+        confidence,
         device_id,
-        signal.x,
-        signal.y,
-        signal.z,
-        magnitude_vec,
     )
 
 
