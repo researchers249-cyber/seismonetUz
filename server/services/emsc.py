@@ -1,15 +1,15 @@
 """EMSC (European-Mediterranean Seismological Centre) API integration."""
-
+ 
 import logging
 from datetime import datetime, timezone, timedelta
-
+ 
 import httpx
-
+ 
 from server.config import settings
-
+ 
 logger = logging.getLogger(__name__)
-
-
+ 
+ 
 async def fetch_earthquakes() -> list[dict]:
     """Fetch recent earthquakes from EMSC for Central Asia region."""
     start_time = (datetime.now(timezone.utc) - timedelta(hours=24)).strftime(
@@ -26,35 +26,42 @@ async def fetch_earthquakes() -> list[dict]:
         "starttime": start_time,
         "orderby": "time",
     }
-
+ 
     try:
         async with httpx.AsyncClient(timeout=15.0) as client:
             response = await client.get(settings.emsc_api_url, params=params)
             response.raise_for_status()
+ 
+            # ✅ Bo'sh javobni tekshirish — JSON parse xatosini oldini oladi
+            text = response.text.strip()
+            if not text:
+                logger.warning("EMSC bo'sh javob qaytardi")
+                return []
+ 
             data = response.json()
+ 
+    except httpx.HTTPStatusError as exc:
+        logger.error("EMSC HTTP xato %s: %s", exc.response.status_code, exc)
+        return []
     except httpx.HTTPError as exc:
         logger.error("EMSC so'rov xatosi: %s", exc)
         return []
     except Exception as exc:
         logger.error("EMSC noma'lum xato: %s", exc)
         return []
-
+ 
     earthquakes: list[dict] = []
-
-    # EMSC returns either {"features": [...]} (GeoJSON) or {"earthquakes": [...]}
     features = data.get("features") or []
     raw_list = data.get("earthquakes") or []
-
+ 
     for feature in features:
         try:
             props = feature.get("properties", {})
             coords = feature.get("geometry", {}).get("coordinates", [0, 0, 0])
             time_str = props.get("time") or props.get("lastupdate") or ""
-            # Normalise timezone marker
             timestamp = time_str.replace(" ", "T")
-            if not timestamp.endswith("Z") and "+" not in timestamp:
+            if timestamp and not timestamp.endswith("Z") and "+" not in timestamp:
                 timestamp += "Z"
-
             earthquakes.append(
                 {
                     "id": props.get("unid") or props.get("evid") or feature.get("id", ""),
@@ -70,14 +77,13 @@ async def fetch_earthquakes() -> list[dict]:
         except Exception as exc:
             logger.warning("EMSC feature parse xatosi: %s", exc)
             continue
-
+ 
     for item in raw_list:
         try:
             time_str = item.get("time") or item.get("lastupdate") or ""
             timestamp = time_str.replace(" ", "T")
-            if not timestamp.endswith("Z") and "+" not in timestamp:
+            if timestamp and not timestamp.endswith("Z") and "+" not in timestamp:
                 timestamp += "Z"
-
             earthquakes.append(
                 {
                     "id": item.get("unid") or item.get("evid") or "",
@@ -93,6 +99,6 @@ async def fetch_earthquakes() -> list[dict]:
         except Exception as exc:
             logger.warning("EMSC item parse xatosi: %s", exc)
             continue
-
+ 
     logger.info("EMSC: %d ta zilzila olindi", len(earthquakes))
     return earthquakes

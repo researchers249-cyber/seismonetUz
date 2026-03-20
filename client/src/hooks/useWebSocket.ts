@@ -127,10 +127,23 @@ export function useWebSocket(): UseWebSocketReturn {
         reconnectDelay.current = MIN_DELAY
 
         // Register this device
-        send({
+        const registerMsg: Record<string, unknown> = {
           type: "DEVICE_REGISTER",
           deviceId: myDeviceId,
-        })
+        }
+        if (typeof navigator !== "undefined" && "geolocation" in navigator) {
+          navigator.geolocation.getCurrentPosition(
+            (pos) => {
+              registerMsg.lat = pos.coords.latitude
+              registerMsg.lon = pos.coords.longitude
+              send(registerMsg)
+            },
+            () => send(registerMsg),
+            { maximumAge: 30_000, timeout: 5_000 },
+        )
+      } else {
+        send(registerMsg)
+      }
 
         // Start ping/pong keep-alive
         pingTimer.current = setInterval(() => {
