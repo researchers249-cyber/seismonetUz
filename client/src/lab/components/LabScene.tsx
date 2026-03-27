@@ -33,6 +33,7 @@ interface LabSceneProps {
 }
 
 const TERMINAL_OFFSET = 0.6;
+// Animation tuning: scale current to particle speed, cap max speed, keep a base flow.
 const CURRENT_TO_ANIMATION_MULTIPLIER = 2;
 const MAX_FLOW_SPEED = 2;
 const MIN_FLOW_SPEED = 0.4;

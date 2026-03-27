@@ -24,9 +24,9 @@ interface CircuitElements {
 }
 
 // Approximate parameters for the linear solver:
-// - 1e6 Ω simulates an open circuit,
-// - 0.05 Ω simulates a short circuit,
-// - pivot tolerance guards numerical stability.
+// - 1e6 Ω simulates an open circuit to keep matrices well-conditioned,
+// - 0.05 Ω simulates a short circuit without causing infinite conductance,
+// - pivot tolerance avoids unstable pivots during Gaussian elimination.
 const OPEN_CIRCUIT_RESISTANCE_OHMS = 1_000_000;
 const SHORT_CIRCUIT_RESISTANCE_OHMS = 0.05;
 const GAUSSIAN_ELIMINATION_PIVOT_TOLERANCE = 1e-9;

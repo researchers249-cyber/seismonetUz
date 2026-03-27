@@ -62,6 +62,7 @@ const initialCharges: Charge[] = [
   { id: "charge-neg", value: -3e-6, position: { x: 1.5, y: 0.6, z: 0 } },
 ];
 
+// Units: conductivity (S/m), mobility (m²/V·s), density (1/m³).
 const mediaOptions: MediumState[] = [
   { id: "metal", label: "Metall", chargeCarrier: "Elektronlar", conductivity: 5.8e7, mobility: 0.003, density: 8.5e28 },
   { id: "electrolyte", label: "Elektrolit", chargeCarrier: "Ionlar", conductivity: 1.2, mobility: 4.5e-8, density: 6e26 },
