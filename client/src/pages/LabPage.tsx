@@ -63,7 +63,7 @@ const initialCharges: Charge[] = [
 ];
 
 const MEDIA_OPTIONS: MediumState[] = [
-  { id: "metal", label: "Metallar", chargeCarrier: "Elektronlar", conductivity: 5.8e7, mobility: 0.003, density: 8.5e28 },
+  { id: "metal", label: "Metall", chargeCarrier: "Elektronlar", conductivity: 5.8e7, mobility: 0.003, density: 8.5e28 },
   { id: "electrolyte", label: "Elektrolit", chargeCarrier: "Ionlar", conductivity: 1.2, mobility: 4.5e-8, density: 6e26 },
   { id: "gas", label: "Gaz", chargeCarrier: "Plazma", conductivity: 0.01, mobility: 2.5e-4, density: 2e25 },
   { id: "semiconductor", label: "Yarim o'tkazgich", chargeCarrier: "Elektron/kovak", conductivity: 0.5, mobility: 0.0014, density: 1e22 },

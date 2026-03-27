@@ -23,8 +23,8 @@ interface CircuitElements {
   voltages: VoltageSourceElement[];
 }
 
-const LARGE_RESISTANCE = 1_000_000;
-const SMALL_RESISTANCE = 0.05;
+const OPEN_CIRCUIT_RESISTANCE = 1_000_000;
+const SHORT_CIRCUIT_RESISTANCE = 0.05;
 
 const clampResistance = (value: number, fallback: number) =>
   Number.isFinite(value) && value > 0 ? value : fallback;
@@ -74,14 +74,14 @@ const getResistanceFromComponent = (
     case "bulb":
       return clampResistance(Number(params.resistance), 12);
     case "ammeter":
-      return clampResistance(Number(params.internalResistance), SMALL_RESISTANCE);
+      return clampResistance(Number(params.internalResistance), SHORT_CIRCUIT_RESISTANCE);
     case "voltmeter":
-      return clampResistance(Number(params.internalResistance), LARGE_RESISTANCE);
+      return clampResistance(Number(params.internalResistance), OPEN_CIRCUIT_RESISTANCE);
     case "switch":
-      return params.closed ? SMALL_RESISTANCE : LARGE_RESISTANCE;
+      return params.closed ? SHORT_CIRCUIT_RESISTANCE : OPEN_CIRCUIT_RESISTANCE;
     case "capacitor": {
       if (mode === "dc" || mode === "safety") {
-        return LARGE_RESISTANCE;
+        return OPEN_CIRCUIT_RESISTANCE;
       }
       const capacitance = clampResistance(Number(params.capacitance), 0.001);
       const reactance = 1 / (2 * Math.PI * frequency * capacitance);
@@ -89,17 +89,17 @@ const getResistanceFromComponent = (
     }
     case "inductor": {
       if (mode === "dc" || mode === "safety") {
-        return SMALL_RESISTANCE;
+        return SHORT_CIRCUIT_RESISTANCE;
       }
       const inductance = clampResistance(Number(params.inductance), 0.05);
       const reactance = 2 * Math.PI * frequency * inductance;
       return Math.max(reactance, 0.01);
     }
     case "diode":
-      return params.conducting ? 10 : LARGE_RESISTANCE;
+      return params.conducting ? 10 : OPEN_CIRCUIT_RESISTANCE;
     case "transistor": {
       if (!params.enabled) {
-        return LARGE_RESISTANCE;
+        return OPEN_CIRCUIT_RESISTANCE;
       }
       const gain = clampResistance(Number(params.gain), 100);
       return Math.max(1 / gain, 0.01);

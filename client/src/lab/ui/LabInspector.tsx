@@ -55,7 +55,7 @@ export function LabInspector({
           <div className="mt-3 space-y-3">
             <div className="flex items-center justify-between text-xs text-gray-400">
               <span>{definition.label}</span>
-              <span className="uppercase tracking-wide">{selectedComponent.id.slice(0, 6)}</span>
+              <span className="uppercase tracking-wide">{selectedComponent.id}</span>
             </div>
             {definition.parameters.map((parameter) => {
               const value = selectedComponent.params[parameter.key];
