@@ -25,6 +25,7 @@ interface CircuitElements {
 
 const OPEN_CIRCUIT_RESISTANCE = 1_000_000;
 const SHORT_CIRCUIT_RESISTANCE = 0.05;
+const MATRIX_PIVOT_TOLERANCE = 1e-9;
 
 const clampResistance = (value: number, fallback: number) =>
   Number.isFinite(value) && value > 0 ? value : fallback;
@@ -218,7 +219,7 @@ const solveLinearSystem = (matrix: number[][], vector: number[]) => {
         pivotRow = row;
       }
     }
-    if (pivotValue < 1e-9) {
+    if (pivotValue < MATRIX_PIVOT_TOLERANCE) {
       return null;
     }
     if (pivotRow !== col) {
