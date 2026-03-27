@@ -26,6 +26,7 @@ export function LabInspector({
   const definition = selectedComponent
     ? COMPONENT_LIBRARY[selectedComponent.type]
     : null;
+  const warnings = solution?.warnings ?? [];
 
   return (
     <aside className="bg-gray-900 border border-gray-800 rounded-2xl p-4 space-y-4">
@@ -108,9 +109,9 @@ export function LabInspector({
         )}
       </div>
 
-      {solution?.warnings.length ? (
+      {warnings.length ? (
         <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 px-3 py-2 text-xs text-rose-100">
-          {solution.warnings.map((warning) => (
+          {warnings.map((warning) => (
             <div key={warning}>{warning}</div>
           ))}
         </div>

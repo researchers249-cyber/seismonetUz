@@ -25,7 +25,12 @@ interface CircuitElements {
 
 const OPEN_CIRCUIT_RESISTANCE = 1_000_000;
 const SHORT_CIRCUIT_RESISTANCE = 0.05;
-const MATRIX_PIVOT_TOLERANCE = 1e-9;
+const GAUSSIAN_ELIMINATION_PIVOT_TOLERANCE = 1e-9;
+
+interface LinearSolveResult {
+  solution: number[] | null;
+  error?: string;
+}
 
 const clampResistance = (value: number, fallback: number) =>
   Number.isFinite(value) && value > 0 ? value : fallback;
@@ -205,7 +210,10 @@ const createCircuitElements = (
   return { nodes, groundNode, resistors, voltages };
 };
 
-const solveLinearSystem = (matrix: number[][], vector: number[]) => {
+const solveLinearSystem = (
+  matrix: number[][],
+  vector: number[]
+): LinearSolveResult => {
   const size = vector.length;
   const augmented = matrix.map((row, i) => [...row, vector[i]]);
 
@@ -219,8 +227,11 @@ const solveLinearSystem = (matrix: number[][], vector: number[]) => {
         pivotRow = row;
       }
     }
-    if (pivotValue < MATRIX_PIVOT_TOLERANCE) {
-      return null;
+    if (pivotValue < GAUSSIAN_ELIMINATION_PIVOT_TOLERANCE) {
+      return {
+        solution: null,
+        error: "Tizim singulyar. Ulanishlar ochiq yoki qisqa bo'lishi mumkin.",
+      };
     }
     if (pivotRow !== col) {
       [augmented[pivotRow], augmented[col]] = [augmented[col], augmented[pivotRow]];
@@ -242,7 +253,7 @@ const solveLinearSystem = (matrix: number[][], vector: number[]) => {
     }
   }
 
-  return augmented.map((row) => row[size]);
+  return { solution: augmented.map((row) => row[size]) };
 };
 
 export const solveCircuit = (
@@ -325,9 +336,11 @@ export const solveCircuit = (
     vector[row] = source.voltage;
   });
 
-  const solution = solveLinearSystem(matrix, vector);
+  const { solution, error } = solveLinearSystem(matrix, vector);
   if (!solution) {
-    warnings.push("Tenglamalar yechimga ega emas. Ulanishlarni tekshiring.");
+    warnings.push(
+      error ?? "Tenglamalar yechimga ega emas. Ulanishlarni tekshiring."
+    );
     return {
       currents: {},
       voltages: {},

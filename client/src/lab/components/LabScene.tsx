@@ -33,9 +33,9 @@ interface LabSceneProps {
 }
 
 const terminalOffset = 0.6;
-const CURRENT_SPEED_MULTIPLIER = 2;
-const CURRENT_SPEED_MAX = 2;
-const BASE_FLOW_SPEED = 0.4;
+const ANIMATION_SPEED_SCALE_FACTOR = 2;
+const MAX_ANIMATION_SPEED = 2;
+const MIN_FLOW_ANIMATION_SPEED = 0.4;
 
 const getWorldPosition = (mesh: THREE.Object3D) => {
   const position = new THREE.Vector3();
@@ -95,6 +95,10 @@ export function LabScene({
       magnet: new THREE.Group(),
       media: new THREE.Group(),
     }),
+    []
+  );
+  const dragPlane = useMemo(
+    () => new THREE.Plane(new THREE.Vector3(0, 1, 0), 0),
     []
   );
 
@@ -209,9 +213,9 @@ export function LabScene({
           const speed =
             Math.min(
               Math.abs(currentsRef.current[connectionId] ?? 0) *
-                CURRENT_SPEED_MULTIPLIER,
-              CURRENT_SPEED_MAX
-            ) + BASE_FLOW_SPEED;
+                ANIMATION_SPEED_SCALE_FACTOR,
+              MAX_ANIMATION_SPEED
+            ) + MIN_FLOW_ANIMATION_SPEED;
           const t = ((time / 1000) * speed) % 1;
           flow.position.lerpVectors(start, end, t);
         }
@@ -424,7 +428,7 @@ export function LabScene({
 
     const raycaster = new THREE.Raycaster();
     const pointer = new THREE.Vector2();
-    const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+    const plane = dragPlane;
 
     const getPointer = (event: PointerEvent) => {
       const rect = container.getBoundingClientRect();
@@ -555,7 +559,15 @@ export function LabScene({
       domElement.removeEventListener("pointerup", onPointerUp);
       domElement.removeEventListener("pointerleave", onPointerUp);
     };
-  }, [connectMode, mode, onConnectTerminals, onMoveCharge, onMoveComponent, onSelectComponent]);
+  }, [
+    connectMode,
+    dragPlane,
+    mode,
+    onConnectTerminals,
+    onMoveCharge,
+    onMoveComponent,
+    onSelectComponent,
+  ]);
 
   const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
