@@ -33,9 +33,9 @@ interface LabSceneProps {
 }
 
 const terminalOffset = 0.6;
-const ANIMATION_SPEED_SCALE_FACTOR = 2;
-const MAX_ANIMATION_SPEED = 2;
-const MIN_FLOW_ANIMATION_SPEED = 0.4;
+const CURRENT_TO_ANIMATION_MULTIPLIER = 2;
+const MAX_FLOW_SPEED = 2;
+const MIN_FLOW_SPEED = 0.4;
 
 const getWorldPosition = (mesh: THREE.Object3D) => {
   const position = new THREE.Vector3();
@@ -213,9 +213,9 @@ export function LabScene({
           const speed =
             Math.min(
               Math.abs(currentsRef.current[connectionId] ?? 0) *
-                ANIMATION_SPEED_SCALE_FACTOR,
-              MAX_ANIMATION_SPEED
-            ) + MIN_FLOW_ANIMATION_SPEED;
+                CURRENT_TO_ANIMATION_MULTIPLIER,
+              MAX_FLOW_SPEED
+            ) + MIN_FLOW_SPEED;
           const t = ((time / 1000) * speed) % 1;
           flow.position.lerpVectors(start, end, t);
         }

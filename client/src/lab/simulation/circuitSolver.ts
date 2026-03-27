@@ -23,8 +23,9 @@ interface CircuitElements {
   voltages: VoltageSourceElement[];
 }
 
-const OPEN_CIRCUIT_RESISTANCE = 1_000_000;
-const SHORT_CIRCUIT_RESISTANCE = 0.05;
+// Approximate resistances used to model open/short circuit behavior in the solver.
+const OPEN_CIRCUIT_RESISTANCE_OHMS = 1_000_000;
+const SHORT_CIRCUIT_RESISTANCE_OHMS = 0.05;
 const GAUSSIAN_ELIMINATION_PIVOT_TOLERANCE = 1e-9;
 
 interface LinearSolveResult {
@@ -80,14 +81,16 @@ const getResistanceFromComponent = (
     case "bulb":
       return clampResistance(Number(params.resistance), 12);
     case "ammeter":
-      return clampResistance(Number(params.internalResistance), SHORT_CIRCUIT_RESISTANCE);
+      return clampResistance(Number(params.internalResistance), SHORT_CIRCUIT_RESISTANCE_OHMS);
     case "voltmeter":
-      return clampResistance(Number(params.internalResistance), OPEN_CIRCUIT_RESISTANCE);
+      return clampResistance(Number(params.internalResistance), OPEN_CIRCUIT_RESISTANCE_OHMS);
     case "switch":
-      return params.closed ? SHORT_CIRCUIT_RESISTANCE : OPEN_CIRCUIT_RESISTANCE;
+      return params.closed
+        ? SHORT_CIRCUIT_RESISTANCE_OHMS
+        : OPEN_CIRCUIT_RESISTANCE_OHMS;
     case "capacitor": {
       if (mode === "dc" || mode === "safety") {
-        return OPEN_CIRCUIT_RESISTANCE;
+        return OPEN_CIRCUIT_RESISTANCE_OHMS;
       }
       const capacitance = clampResistance(Number(params.capacitance), 0.001);
       const reactance = 1 / (2 * Math.PI * frequency * capacitance);
@@ -95,17 +98,17 @@ const getResistanceFromComponent = (
     }
     case "inductor": {
       if (mode === "dc" || mode === "safety") {
-        return SHORT_CIRCUIT_RESISTANCE;
+        return SHORT_CIRCUIT_RESISTANCE_OHMS;
       }
       const inductance = clampResistance(Number(params.inductance), 0.05);
       const reactance = 2 * Math.PI * frequency * inductance;
       return Math.max(reactance, 0.01);
     }
     case "diode":
-      return params.conducting ? 10 : OPEN_CIRCUIT_RESISTANCE;
+      return params.conducting ? 10 : OPEN_CIRCUIT_RESISTANCE_OHMS;
     case "transistor": {
       if (!params.enabled) {
-        return OPEN_CIRCUIT_RESISTANCE;
+        return OPEN_CIRCUIT_RESISTANCE_OHMS;
       }
       const gain = clampResistance(Number(params.gain), 100);
       return Math.max(1 / gain, 0.01);
@@ -230,7 +233,7 @@ const solveLinearSystem = (
     if (pivotValue < GAUSSIAN_ELIMINATION_PIVOT_TOLERANCE) {
       return {
         solution: null,
-        error: "Tizim singulyar. Ulanishlar ochiq yoki qisqa bo'lishi mumkin.",
+        error: "Tizim singular. Ulanishlar ochiq yoki qisqa bo'lishi mumkin.",
       };
     }
     if (pivotRow !== col) {

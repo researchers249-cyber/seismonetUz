@@ -62,7 +62,7 @@ const initialCharges: Charge[] = [
   { id: "charge-neg", value: -3e-6, position: { x: 1.5, y: 0.6, z: 0 } },
 ];
 
-const MEDIA_OPTIONS: MediumState[] = [
+const mediaOptions: MediumState[] = [
   { id: "metal", label: "Metall", chargeCarrier: "Elektronlar", conductivity: 5.8e7, mobility: 0.003, density: 8.5e28 },
   { id: "electrolyte", label: "Elektrolit", chargeCarrier: "Ionlar", conductivity: 1.2, mobility: 4.5e-8, density: 6e26 },
   { id: "gas", label: "Gaz", chargeCarrier: "Plazma", conductivity: 0.01, mobility: 2.5e-4, density: 2e25 },
@@ -134,7 +134,7 @@ export default function LabPage() {
     return current * magneticFieldStrength * 0.8;
   }, [circuitSolution.totalCurrent, magneticFieldStrength]);
 
-  const activeMedium = MEDIA_OPTIONS.find((medium) => medium.id === activeMediumId) ?? MEDIA_OPTIONS[0];
+  const activeMedium = mediaOptions.find((medium) => medium.id === activeMediumId) ?? mediaOptions[0];
   const driftVelocity = useMemo(
     () => calculateDriftVelocity(activeMedium.mobility, electricField),
     [activeMedium.mobility, electricField]
@@ -445,7 +445,7 @@ export default function LabPage() {
                       value={activeMediumId}
                       onChange={(event) => setActiveMediumId(event.target.value)}
                     >
-                      {MEDIA_OPTIONS.map((medium) => (
+                      {mediaOptions.map((medium) => (
                         <option key={medium.id} value={medium.id}>
                           {medium.label}
                         </option>

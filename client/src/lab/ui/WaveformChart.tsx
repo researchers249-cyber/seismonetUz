@@ -11,6 +11,8 @@ import { Line } from "react-chartjs-2";
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Legend);
 
+const PHASE_BACKGROUND_ALPHA = 0.2;
+
 interface PhaseVoltage {
   label: string;
   data: number[];
@@ -30,13 +32,28 @@ export function WaveformChart({
   current,
   phaseVoltages,
 }: WaveformChartProps) {
+  const toRgba = (hex: string, alpha: number) => {
+    const sanitized = hex.replace("#", "");
+    const value =
+      sanitized.length === 3
+        ? sanitized
+            .split("")
+            .map((char) => char + char)
+            .join("")
+        : sanitized;
+    const red = parseInt(value.slice(0, 2), 16);
+    const green = parseInt(value.slice(2, 4), 16);
+    const blue = parseInt(value.slice(4, 6), 16);
+    return `rgba(${red}, ${green}, ${blue}, ${alpha})`;
+  };
+
   const datasets = phaseVoltages?.length
     ? [
         ...phaseVoltages.map((phase) => ({
           label: phase.label,
           data: phase.data,
           borderColor: phase.color,
-          backgroundColor: `${phase.color}33`,
+          backgroundColor: toRgba(phase.color, PHASE_BACKGROUND_ALPHA),
           tension: 0.35,
           pointRadius: 0,
         })),
