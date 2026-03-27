@@ -32,7 +32,7 @@ interface LabSceneProps {
   onMoveCharge: (id: string, position: Vec3) => void;
 }
 
-const terminalOffset = 0.6;
+const TERMINAL_OFFSET = 0.6;
 const CURRENT_TO_ANIMATION_MULTIPLIER = 2;
 const MAX_FLOW_SPEED = 2;
 const MIN_FLOW_SPEED = 0.4;
@@ -648,8 +648,8 @@ const createComponentMesh = (component: LabComponent) => {
   const terminalGeometry = new THREE.SphereGeometry(0.12, 16, 16);
   const terminalLeft = new THREE.Mesh(terminalGeometry, terminalMaterial);
   const terminalRight = new THREE.Mesh(terminalGeometry, terminalMaterial);
-  terminalLeft.position.set(-terminalOffset, 0, 0);
-  terminalRight.position.set(terminalOffset, 0, 0);
+  terminalLeft.position.set(-TERMINAL_OFFSET, 0, 0);
+  terminalRight.position.set(TERMINAL_OFFSET, 0, 0);
   terminalLeft.userData = { componentId: component.id, terminal: 0 };
   terminalRight.userData = { componentId: component.id, terminal: 1 };
   mesh.add(terminalLeft, terminalRight);

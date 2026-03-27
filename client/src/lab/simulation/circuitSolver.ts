@@ -23,7 +23,10 @@ interface CircuitElements {
   voltages: VoltageSourceElement[];
 }
 
-// Approximate resistances used to model open/short circuit behavior in the solver.
+// Approximate parameters for the linear solver:
+// - 1e6 Ω simulates an open circuit,
+// - 0.05 Ω simulates a short circuit,
+// - pivot tolerance guards numerical stability.
 const OPEN_CIRCUIT_RESISTANCE_OHMS = 1_000_000;
 const SHORT_CIRCUIT_RESISTANCE_OHMS = 0.05;
 const GAUSSIAN_ELIMINATION_PIVOT_TOLERANCE = 1e-9;

@@ -11,7 +11,7 @@ import { Line } from "react-chartjs-2";
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Legend);
 
-const PHASE_BACKGROUND_ALPHA = 0.2;
+const PHASE_BACKGROUND_ALPHA_VALUE = 0.2;
 
 interface PhaseVoltage {
   label: string;
@@ -53,7 +53,7 @@ export function WaveformChart({
           label: phase.label,
           data: phase.data,
           borderColor: phase.color,
-          backgroundColor: toRgba(phase.color, PHASE_BACKGROUND_ALPHA),
+          backgroundColor: toRgba(phase.color, PHASE_BACKGROUND_ALPHA_VALUE),
           tension: 0.35,
           pointRadius: 0,
         })),

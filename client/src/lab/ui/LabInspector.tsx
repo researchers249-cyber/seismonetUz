@@ -11,7 +11,7 @@ interface Metric {
 interface LabInspectorProps {
   mode: LabMode;
   selectedComponent: LabComponent | null;
-  solution: CircuitSolution | null;
+  solution: CircuitSolution;
   onUpdateParam: (id: string, key: string, value: number | boolean) => void;
   metrics: Metric[];
 }
@@ -26,7 +26,7 @@ export function LabInspector({
   const definition = selectedComponent
     ? COMPONENT_LIBRARY[selectedComponent.type]
     : null;
-  const warnings = solution?.warnings ?? [];
+  const warnings = solution.warnings;
 
   return (
     <aside className="bg-gray-900 border border-gray-800 rounded-2xl p-4 space-y-4">

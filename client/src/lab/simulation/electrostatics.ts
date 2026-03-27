@@ -1,5 +1,6 @@
 import { Charge, FieldLine, Vec3 } from "../types";
 
+// Coulomb constant (N·m²/C²).
 const K = 8.9875517923e9;
 
 export const calculateCoulombForce = (
