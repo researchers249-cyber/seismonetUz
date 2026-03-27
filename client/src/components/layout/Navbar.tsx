@@ -6,6 +6,7 @@ const NAV_LINKS = [
   { to: "/", label: "Bosh sahifa" },
   { to: "/earthquakes", label: "Zilzilalar" },
   { to: "/alerts", label: "Ogohlantirishlar" },
+  { to: "/lab", label: "3D Laboratoriya" },
   { to: "/safety", label: "Xavfsizlik" },
   { to: "/about", label: "Haqida" },
 ];

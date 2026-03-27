@@ -15,6 +15,7 @@ import EarthquakesPage from "./pages/EarthquakesPage";
 import AlertsPage from "./pages/AlertsPage";
 import SafetyPage from "./pages/SafetyPage";
 import AboutPage from "./pages/AboutPage";
+import LabPage from "./pages/LabPage";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -53,6 +54,7 @@ function AppShell() {
           <Route path="/alerts" element={<AlertsPage />} />
           <Route path="/safety" element={<SafetyPage />} />
           <Route path="/about" element={<AboutPage />} />
+          <Route path="/lab" element={<LabPage />} />
         </Routes>
       </div>
 

@@ -22,6 +22,7 @@ Railway avtomatik ravishda `railway.toml` asosida build va deploy qiladi.
 https://[RAILWAY-DOMAIN]/health   # health check
 https://[RAILWAY-DOMAIN]/         # frontend
 https://[RAILWAY-DOMAIN]/ws       # WebSocket
+https://[RAILWAY-DOMAIN]/lab      # 3D elektromagnit laboratoriya
 ```
 
 ## Server uxlamasligi (UptimeRobot)
